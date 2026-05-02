@@ -7,20 +7,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ─────────────────────────────────────────────
-
 # AYARLAR
 
-# ─────────────────────────────────────────────
-
-DESTEK_ROLU_ID      = 1499363289929351288   # Destek ekibi rolü
-YETKILI_KULLANICI_ID = 1438202822897434738  # .ticketkur yapabilecek kullanıcı
-
-# ─────────────────────────────────────────────
+DESTEK_ROLU_ID       = 1499363289929351288
+YETKILI_KULLANICI_ID = 1438202822897434738
 
 # BOT KURULUMU
-
-# ─────────────────────────────────────────────
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -28,37 +20,31 @@ intents.members = True
 
 bot = commands.Bot(command_prefix=”.”, intents=intents)
 
-# ─────────────────────────────────────────────
-
 # DESTEK BUTONU VIEW
-
-# ─────────────────────────────────────────────
 
 class DestekView(View):
 def **init**(self):
-super().**init**(timeout=None)  # Kalıcı view
+super().**init**(timeout=None)
 
 ```
 @discord.ui.button(
-    label="📩 Destek Al",
+    label="Destek Al",
     style=discord.ButtonStyle.primary,
     custom_id="destek_butonu"
 )
 async def destek_butonu(self, interaction: discord.Interaction, button: Button):
-    guild  = interaction.guild
-    user   = interaction.user
-    role   = guild.get_role(DESTEK_ROLU_ID)
+    guild = interaction.guild
+    user  = interaction.user
+    role  = guild.get_role(DESTEK_ROLU_ID)
 
-    # Zaten açık bir ticket var mı kontrol et
     existing = discord.utils.get(guild.channels, name=f"destek-{user.name.lower()}")
     if existing:
         await interaction.response.send_message(
-            f"❌ Zaten açık bir destek kanalın var: {existing.mention}",
+            f"Zaten acik bir destek kanalin var: {existing.mention}",
             ephemeral=True
         )
         return
 
-    # Kanal izinleri
     overwrites = {
         guild.default_role: discord.PermissionOverwrite(view_channel=False),
         user: discord.PermissionOverwrite(
@@ -74,65 +60,55 @@ async def destek_butonu(self, interaction: discord.Interaction, button: Button):
             read_message_history=True
         )
 
-    # Kanalı oluştur
     kanal = await guild.create_text_channel(
         name=f"destek-{user.name}",
         overwrites=overwrites,
-        topic=f"{user.id} tarafından açılan destek kanalı"
+        topic=f"{user.id} tarafindan acilan destek kanali"
     )
 
-    # Ticket mesajı
     embed = discord.Embed(
-        title="🎫 Destek Talebi Oluşturuldu",
+        title="Destek Talebi Olusturuldu",
         description=(
-            f"Merhaba {user.mention}! Destek talebiniz alındı.\n\n"
-            "Destek ekibimiz en kısa sürede size yardımcı olacak.\n"
-            f"Kanalı kapatmak için: `.delete`"
+            f"Merhaba {user.mention}! Destek talebiniz alindi.\n\n"
+            "Destek ekibimiz en kisa surede size yardimci olacak.\n"
+            "Kanali kapatmak icin: `.delete`"
         ),
         color=0x5865F2
     )
     embed.set_footer(text="Nova Lig Destek Sistemi")
 
-    await kanal.send(
-        content=f"{user.mention} {role.mention if role else ''}",
-        embed=embed
-    )
+    await kanal.send(embed=embed)
 
-    # Tag mesajı — hemen arkasından sil ki kanalı kirletmesin
-    tag_msg = await kanal.send(f"🔔 {user.mention} {role.mention if role else ''}")
+    tag_msg = await kanal.send(
+        f"{user.mention} {role.mention if role else ''}"
+    )
     await asyncio.sleep(3)
     await tag_msg.delete()
 
     await interaction.response.send_message(
-        f"✅ Destek kanalın oluşturuldu: {kanal.mention}",
+        f"Destek kanalin olusturuldu: {kanal.mention}",
         ephemeral=True
     )
 ```
 
-# ─────────────────────────────────────────────
-
 # KOMUTLAR
-
-# ─────────────────────────────────────────────
 
 @bot.command(name=“ticketkur”)
 async def ticketkur(ctx):
-“”“Destek panelini komutu yazılan kanala kurar.”””
-# Yetki kontrolü: sunucu sahibi VEYA belirtilen kullanıcı
 if ctx.author.id != YETKILI_KULLANICI_ID and ctx.author.id != ctx.guild.owner_id:
-await ctx.send(“❌ Bu komutu kullanma yetkiniz yok.”, delete_after=5)
+await ctx.send(“Bu komutu kullanma yetkiniz yok.”, delete_after=5)
 return
 
 ```
 embed = discord.Embed(
-    title="🛡️ Nova Lig Destek",
+    title="Nova Lig Destek",
     description=(
-        "Herhangi bir konuda yardıma ihtiyaç duyuyorsanız\n"
-        "aşağıdaki butona tıklayarak destek talebi oluşturabilirsiniz."
+        "Herhangi bir konuda yardima ihtiyac duyuyorsaniz\n"
+        "asagidaki butona tiklayarak destek talebi olusturabilirsiniz."
     ),
     color=0x5865F2
 )
-embed.set_footer(text="Nova Lig • Destek Sistemi")
+embed.set_footer(text="Nova Lig - Destek Sistemi")
 
 view = DestekView()
 await ctx.send(embed=embed, view=view)
@@ -145,41 +121,38 @@ except discord.Forbidden:
 
 @bot.command(name=“delete”)
 async def delete(ctx):
-“”“Bulunulan ticket kanalını siler. Sadece destek rolü kullanabilir.”””
 role = ctx.guild.get_role(DESTEK_ROLU_ID)
 
 ```
 if role not in ctx.author.roles:
-    await ctx.send("❌ Bu komutu kullanma yetkiniz yok.", delete_after=5)
+    await ctx.send("Bu komutu kullanma yetkiniz yok.", delete_after=5)
     return
 
-# Kanal bir ticket kanalı mı?
 if not ctx.channel.name.startswith("destek-"):
-    await ctx.send("❌ Bu komut sadece destek kanallarında kullanılabilir.", delete_after=5)
+    await ctx.send("Bu komut sadece destek kanallarinda kullanilabilir.", delete_after=5)
     return
 
 embed = discord.Embed(
-    title="🗑️ Kanal Siliniyor",
-    description="Bu destek kanalı 5 saniye içinde silinecek...",
+    title="Kanal Siliniyor",
+    description="Bu destek kanali 5 saniye icinde silinecek...",
     color=0xFF4444
 )
 await ctx.send(embed=embed)
 await asyncio.sleep(5)
-await ctx.channel.delete(reason=f"{ctx.author} tarafından silindi.")
+await ctx.channel.delete(reason=f"{ctx.author} tarafindan silindi.")
 ```
 
-@bot.command(name=“ticketkullanıcı-ekle”)
+@bot.command(name=“ticketkullanici-ekle”)
 async def ticket_kullanici_ekle(ctx, member: discord.Member):
-“”“Bir kullanıcıyı ticket kanalına ekler. Sadece destek rolü yapabilir.”””
 role = ctx.guild.get_role(DESTEK_ROLU_ID)
 
 ```
 if role not in ctx.author.roles:
-    await ctx.send("❌ Bu komutu kullanma yetkiniz yok.", delete_after=5)
+    await ctx.send("Bu komutu kullanma yetkiniz yok.", delete_after=5)
     return
 
 if not ctx.channel.name.startswith("destek-"):
-    await ctx.send("❌ Bu komut sadece destek kanallarında kullanılabilir.", delete_after=5)
+    await ctx.send("Bu komut sadece destek kanallarinda kullanilabilir.", delete_after=5)
     return
 
 await ctx.channel.set_permissions(
@@ -190,29 +163,17 @@ await ctx.channel.set_permissions(
 )
 
 embed = discord.Embed(
-    description=f"✅ {member.mention} bu kanala eklendi.",
+    description=f"{member.mention} bu kanala eklendi.",
     color=0x57F287
 )
 await ctx.send(embed=embed)
 ```
 
-# ─────────────────────────────────────────────
-
-# PERSISTENT VIEW KAYDI (bot yeniden başlayınca)
-
-# ─────────────────────────────────────────────
+# PERSISTENT VIEW KAYDI
 
 @bot.event
 async def on_ready():
-bot.add_view(DestekView())  # Kalıcı view’i kaydet
-print(f”✅ {bot.user} olarak giriş yapıldı.”)
-print(f”   Prefix  : .”)
-print(f”   Destek Rol ID: {DESTEK_ROLU_ID}”)
+bot.add_view(DestekView())
+print(f”Bot acildi: {bot.user}”)
 
-# ─────────────────────────────────────────────
-
-# BOTU ÇALIŞTIR
-
-# ─────────────────────────────────────────────
-
-bot.run(os.getenv(“TOKEN”))
+bot.run(os.getenv(“DISCORD_TOKEN”))
