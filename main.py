@@ -176,4 +176,4 @@ async def on_ready():
 bot.add_view(DestekView())
 print(f”Bot acildi: {bot.user}”)
 
-bot.run(os.getenv(“DISCORD_TOKEN”))
+bot.run(os.getenv("TOKEN”))
