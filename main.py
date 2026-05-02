@@ -2,9 +2,6 @@ import discord
 from discord.ext import commands
 from discord.ui import View, Button
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=".", intents=intents)
@@ -21,9 +18,10 @@ class TicketView(View):
 
     @discord.ui.button(label="Destek Aç", style=discord.ButtonStyle.green)
     async def ticket_ac(self, interaction: discord.Interaction, button: Button):
+        await interaction.response.defer(ephemeral=True)
+
         guild = interaction.guild
         user = interaction.user
-
         kategori = interaction.channel.category
 
         overwrites = {
@@ -42,8 +40,8 @@ class TicketView(View):
 
         await kanal.send(f"{user.mention} destek talebi oluşturdu.\n<@&{DESTEK_ROL_ID}>")
 
-        await interaction.response.send_message(
-            f"Destek kanalın oluşturuldu: {kanal.mention}",
+        await interaction.followup.send(
+            f"#{kanal.name} desteğin oluşturuldu",
             ephemeral=True
         )
 
@@ -91,6 +89,7 @@ async def ticket_kullanici_ekle(ctx, member: discord.Member):
 @bot.event
 async def on_ready():
     print(f"{bot.user} aktif!")
+    bot.add_view(TicketView())  # BUTON KALICI
 
 
 # ---------------- RUN ---------------- #
