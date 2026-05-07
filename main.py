@@ -343,7 +343,7 @@ async def baslat(ctx):
 # ---------------- HELP ----------------
 @bot.command(
     name="yardım",
-    aliases=["yardim", "help"]
+    aliases=["yardim"]
 )
 async def yardim(ctx):
 
