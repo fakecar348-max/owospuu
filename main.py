@@ -23,11 +23,9 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-# help sistemi kapatıldı
 bot = commands.Bot(
     command_prefix=".",
-    intents=intents,
-    help_command=None
+    intents=intents
 )
 
 kayit_sayilari = {}
@@ -90,29 +88,13 @@ async def kayitsiz(ctx, member: discord.Member = None):
     if member is None:
         return await ctx.send("❌ Kullanıcı belirt!")
 
-    # HERKES
-    if str(member).lower() in ["all", "@everyone", "everyone"]:
-
-        await ctx.send("⚠️ Tüm sunucu kayıtsıza çekiliyor...")
-
-        for m in ctx.guild.members:
-
-            if m.bot:
-                continue
-
-            try:
-                await m.edit(roles=[])
-                await m.add_roles(kayitsiz_rol)
-            except:
-                pass
-
-        return await ctx.send("✅ Herkes kayıtsız yapıldı.")
-
-    # TEK KİŞİ
     await member.edit(roles=[])
+
     await member.add_roles(kayitsiz_rol)
 
-    await ctx.send(f"🔴 {member.mention} kayıtsız yapıldı.")
+    await ctx.send(
+        f"🔴 {member.mention} kayıtsız yapıldı."
+    )
 
 # ---------------- KAYIT MENU ----------------
 class KayitMenu(View):
@@ -170,7 +152,6 @@ class KayitMenu(View):
         if kayitsiz in self.member.roles:
             await self.member.remove_roles(kayitsiz)
 
-        # kayıt sayısı
         kayit_sayilari[self.yetkili.id] = (
             kayit_sayilari.get(self.yetkili.id, 0) + 1
         )
@@ -340,7 +321,7 @@ async def baslat(ctx):
 
     kostebek_katilim.clear()
 
-# ---------------- HELP ----------------
+# ---------------- YARDIM ----------------
 @bot.command(
     name="yardım",
     aliases=["yardim"]
@@ -357,7 +338,6 @@ async def yardim(ctx):
         value=(
             "`.k @üye isim`\n"
             "`.kayitsiz @üye`\n"
-            "`.kayitsiz all`\n"
             "`.kayıtsay`"
         ),
         inline=False
