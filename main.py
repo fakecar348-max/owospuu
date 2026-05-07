@@ -23,7 +23,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-# help_command kapatıldı
+# help sistemi kapatıldı
 bot = commands.Bot(
     command_prefix=".",
     intents=intents,
@@ -37,6 +37,7 @@ kostebek_katilim = []
 # ---------------- READY ----------------
 @bot.event
 async def on_ready():
+
     for guild in bot.guilds:
         invites_cache[guild.id] = await guild.invites()
 
@@ -54,6 +55,7 @@ async def find_invite(member):
 
     for new in new_invites:
         for old in old_invites:
+
             if new.code == old.code and new.uses > old.uses:
                 return new
 
@@ -88,10 +90,10 @@ async def kayitsiz(ctx, member: discord.Member = None):
     if member is None:
         return await ctx.send("❌ Kullanıcı belirt!")
 
-    # herkes kayıtsız
+    # HERKES
     if str(member).lower() in ["all", "@everyone", "everyone"]:
 
-        await ctx.send("⚠️ Herkes kayıtsıza alınıyor...")
+        await ctx.send("⚠️ Tüm sunucu kayıtsıza çekiliyor...")
 
         for m in ctx.guild.members:
 
@@ -104,9 +106,9 @@ async def kayitsiz(ctx, member: discord.Member = None):
             except:
                 pass
 
-        return await ctx.send("✅ Tüm kullanıcılar kayıtsız yapıldı.")
+        return await ctx.send("✅ Herkes kayıtsız yapıldı.")
 
-    # tek kullanıcı
+    # TEK KİŞİ
     await member.edit(roles=[])
     await member.add_roles(kayitsiz_rol)
 
@@ -117,6 +119,7 @@ class KayitMenu(View):
 
     def __init__(self, member, yetkili):
         super().__init__(timeout=60)
+
         self.member = member
         self.yetkili = yetkili
 
@@ -188,7 +191,7 @@ async def k(ctx, member: discord.Member, *, isim):
 
     embed = discord.Embed(
         title="Birini Seçin",
-        description=f"{member.mention} için rol seç.",
+        description=f"{member.mention} için kayıt türünü seç.",
         color=discord.Color.blue()
     )
 
@@ -323,6 +326,7 @@ async def baslat(ctx):
     secilen = random.choice(kostebek_katilim)
 
     try:
+
         await ctx.author.send(
             f"🕵️ Gizli Köstebek: {secilen.mention}"
         )
@@ -336,7 +340,7 @@ async def baslat(ctx):
 
     kostebek_katilim.clear()
 
-# ---------------- YARDIM ----------------
+# ---------------- HELP ----------------
 @bot.command(
     name="yardım",
     aliases=["yardim", "help"]
@@ -351,10 +355,10 @@ async def yardim(ctx):
     embed.add_field(
         name="📝 Kayıt Komutları",
         value=(
-            "`.k @üye isim` → kayıt eder\n"
-            "`.kayitsiz @üye` → kayıtsız yapar\n"
-            "`.kayitsiz all` → herkesi kayıtsız yapar\n"
-            "`.kayıtsay` → kayıt sayını gösterir"
+            "`.k @üye isim`\n"
+            "`.kayitsiz @üye`\n"
+            "`.kayitsiz all`\n"
+            "`.kayıtsay`"
         ),
         inline=False
     )
@@ -362,8 +366,8 @@ async def yardim(ctx):
     embed.add_field(
         name="🎮 Eğlence",
         value=(
-            "`.kostebekozel` → köstebek oyunu\n"
-            "`.baslat` → oyunu başlatır"
+            "`.kostebekozel`\n"
+            "`.baslat`"
         ),
         inline=False
     )
